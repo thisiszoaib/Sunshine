@@ -8,5 +8,14 @@
 
     <string name="pref_location_label">Location</string>
     <string name="pref_location_key" translatable="false">location</string>
-    <string name="pref_location_default" translatable="false">Karachi,pk</string>
+    <string name="pref_location_default" translatable="false">10008</string>
+
+    <string name="pref_units_key">units</string>
+    <string name="pref_units_label">Units</string>
+    <string name="pref_units_metric">metric</string>
+    <string name="pref_units_imperial">imperial</string>
+
+    <string name="action_map">Map Location</string>
+
+    <string name="action_share">Share</string>
 </resources>
