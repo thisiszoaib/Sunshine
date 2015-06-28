@@ -5,6 +5,8 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
 /**
@@ -21,6 +23,84 @@ public class WeatherProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
     private WeatherDBHelper mOpenHelper;
+
+    private static final SQLiteQueryBuilder sWeatherByLocationSettingQueryBuilder;
+
+    static{
+        sWeatherByLocationSettingQueryBuilder = new SQLiteQueryBuilder();
+        sWeatherByLocationSettingQueryBuilder.setTables(
+                WeatherContract.WeatherEntry.TABLE_NAME + " INNER JOIN " +
+                        WeatherContract.LocationEntry.TABLE_NAME +
+                        " ON " + WeatherContract.WeatherEntry.TABLE_NAME + "." +
+                        WeatherContract.WeatherEntry.COLUMN_LOC_KEY +
+                        " = " + WeatherContract.LocationEntry.TABLE_NAME + "." +
+                        WeatherContract.LocationEntry._ID);
+    }
+
+    private static final String sLocationSettingSelection =
+            WeatherContract.LocationEntry.TABLE_NAME +
+                    "." + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING +
+                    " = ? ";
+    private static final String sLocationSettingWithStartDateSelection =
+            WeatherContract.LocationEntry.TABLE_NAME +
+                    "." + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING +
+                    " = ? AND " +
+            WeatherContract.WeatherEntry.TABLE_NAME + "." +
+                    WeatherContract.WeatherEntry.COLUMN_DATETEXT + " >= ? ";
+    private static final String sLocationSettingWithDateSelection =
+            WeatherContract.LocationEntry.TABLE_NAME +
+                    "." + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING +
+                    " = ? AND " +
+                    WeatherContract.WeatherEntry.TABLE_NAME + "." +
+                    WeatherContract.WeatherEntry.COLUMN_DATETEXT + " = ? ";
+
+    private Cursor getWeatherByLocationAndDate(Uri uri, String[] projection, String sortOrder)
+    {
+        String locationSetting = WeatherContract.WeatherEntry.getLocationSettingFromUri(uri);
+        String dateSetting = WeatherContract.WeatherEntry.getDateFromUri(uri);
+
+        String selection = sLocationSettingWithDateSelection;
+        String[] selectionArgs = new String[]{locationSetting,dateSetting};
+
+        return sWeatherByLocationSettingQueryBuilder.query(
+                mOpenHelper.getReadableDatabase(),
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder
+        );
+    }
+
+    private Cursor getWeatherByLocationSetting(Uri uri,String[] projection,String sortOrder)
+    {
+        String locationSetting = WeatherContract.WeatherEntry.getLocationSettingFromUri(uri);
+        String startDate = WeatherContract.WeatherEntry.getStartDateFromUri(uri);
+
+        String [] selectionArgs;
+        String selection;
+
+        if(startDate == null)
+        {
+            selection = sLocationSettingSelection;
+            selectionArgs = new String[]{locationSetting};
+        }else
+        {
+            selection = sLocationSettingWithStartDateSelection;
+            selectionArgs = new String[] {locationSetting,startDate};
+        }
+
+        return sWeatherByLocationSettingQueryBuilder.query(
+                mOpenHelper.getReadableDatabase(),
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder
+        );
+    }
 
     private static UriMatcher buildUriMatcher()
     {
@@ -51,10 +131,10 @@ public class WeatherProvider extends ContentProvider {
         switch(sUriMatcher.match(uri))
         {
             case WEATHER_WITH_LOCATION_AND_DATE:
-                retCursor = null;
+                retCursor = getWeatherByLocationAndDate(uri,projection,sortOrder);
                 break;
             case WEATHER_WITH_LOCATION:
-                retCursor = null;
+                retCursor = getWeatherByLocationSetting(uri,projection,sortOrder);
                 break;
             case WEATHER:
                 retCursor = mOpenHelper.getReadableDatabase().query(
@@ -121,16 +201,126 @@ public class WeatherProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        return null;
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        Uri returnUri = WeatherContract.WeatherEntry.CONTENT_URI;
+        switch(match)
+        {
+            case WEATHER:{
+                long _id = db.insert(WeatherContract.WeatherEntry.TABLE_NAME,
+                        null,
+                        values);
+                if(_id > 0)
+                    returnUri = WeatherContract.WeatherEntry.buildWeatherUri(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
+            case LOCATION:{
+                long _id = db.insert(WeatherContract.LocationEntry.TABLE_NAME,
+                        null,
+                        values);
+                if(_id > 0)
+                    returnUri = WeatherContract.LocationEntry.buildLocationUri(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException("Unknown URI: " + uri);
+        }
+
+        getContext().getContentResolver().notifyChange(uri,null);
+
+        return returnUri;
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int rowsDeleted=0;
+        switch(match)
+        {
+            case WEATHER:{
+                rowsDeleted = db.delete(WeatherContract.WeatherEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs);
+                break;
+            }
+            case LOCATION:{
+                rowsDeleted = db.delete(WeatherContract.LocationEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs);
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException("Unknown URI: " + uri);
+        }
+
+        if(selection == null || rowsDeleted != 0)
+            getContext().getContentResolver().notifyChange(uri,null);
+        return rowsDeleted;
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int rowsUpdated=0;
+        switch(match)
+        {
+            case WEATHER:{
+                rowsUpdated = db.update(WeatherContract.WeatherEntry.TABLE_NAME,
+                        values,
+                        selection,
+                        selectionArgs);
+                break;
+            }
+            case LOCATION:{
+                rowsUpdated = db.update(WeatherContract.LocationEntry.TABLE_NAME,
+                        values,
+                        selection,
+                        selectionArgs);
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException("Unknown URI: " + uri);
+        }
+
+        if(rowsUpdated != 0)
+            getContext().getContentResolver().notifyChange(uri,null);
+        return rowsUpdated;
+    }
+
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        switch(match)
+        {
+            case WEATHER:
+                db.beginTransaction();
+                int returnCount=0;
+                try{
+                    for(ContentValues value:values)
+                    {
+                        long _id = db.insert(WeatherContract.WeatherEntry.TABLE_NAME,
+                                null,
+                                value);
+                        if(_id != -1)
+                            returnCount++;
+                    }
+                    db.setTransactionSuccessful();
+                }finally {
+                    db.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri,null);
+                return returnCount;
+            default:
+                return super.bulkInsert(uri, values);
+        }
+
     }
 }
