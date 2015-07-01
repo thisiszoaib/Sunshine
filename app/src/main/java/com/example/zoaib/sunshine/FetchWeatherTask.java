@@ -6,7 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.text.format.Time;
 import android.util.Log;
 
 import com.example.zoaib.sunshine.data.WeatherContract;
@@ -21,6 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Vector;
 
@@ -182,14 +182,7 @@ public class FetchWeatherTask extends AsyncTask<String,Void,Void>
             // current day, we're going to take advantage of that to get a nice
             // normalized UTC date for all of our weather.
 
-            Time dayTime = new Time();
-            dayTime.setToNow();
-
-            // we start at the day returned by local time. Otherwise this is a mess.
-            int julianStartDay = Time.getJulianDay(System.currentTimeMillis(), dayTime.gmtoff);
-
-            // now we work exclusively in UTC
-            dayTime = new Time();
+            Date todayDate = new Date();
 
             for(int i = 0; i < weatherArray.length(); i++) {
                 // These are the values that will be collected.
@@ -208,9 +201,12 @@ public class FetchWeatherTask extends AsyncTask<String,Void,Void>
                 // Get the JSON object representing the day
                 JSONObject dayForecast = weatherArray.getJSONObject(i);
 
+                Calendar c = Calendar.getInstance();
+                c.setTime(todayDate);
+                c.add(Calendar.DATE, i);
+                dateTime = WeatherContract.getDbDateString(c.getTime());
                 // Cheating to convert this to UTC time, which is what we want anyhow
-                dateTime = WeatherContract.getDbDateString(new Date());
-                        //dayTime.setJulianDay(julianStartDay+i);
+                //dateTime = dayTime.setJulianDay(julianStartDay+i);
 
                 pressure = dayForecast.getDouble(OWM_PRESSURE);
                 humidity = dayForecast.getInt(OWM_HUMIDITY);
@@ -243,7 +239,7 @@ public class FetchWeatherTask extends AsyncTask<String,Void,Void>
                 weatherValues.put(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC, description);
                 weatherValues.put(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID, weatherId);
 
-                //Log.d(LOG_TAG,"Date: " + dateTime);
+                //Log.d(LOG_TAG, "Date: " + dateTime + " location: " + locationId);
 
                 cVVector.add(weatherValues);
             }
@@ -258,7 +254,6 @@ public class FetchWeatherTask extends AsyncTask<String,Void,Void>
 
             }
             Log.d(LOG_TAG,"FetchWeatherTask Complete. " + actualInsertions + " Inserted.");
-
 
         }
         catch(JSONException ex)

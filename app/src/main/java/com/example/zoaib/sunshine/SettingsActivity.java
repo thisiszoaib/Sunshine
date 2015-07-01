@@ -6,6 +6,8 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
+import com.example.zoaib.sunshine.data.WeatherContract;
+
 /**
  * A {@link PreferenceActivity} that presents a set of application settings.
  * <p>
@@ -49,6 +51,17 @@ public class SettingsActivity extends PreferenceActivity
     @Override
     public boolean onPreferenceChange(Preference preference, Object value) {
         String stringValue = value.toString();
+        //if(!mBindingPreference)
+        if(preference.getKey().equals(getString(R.string.pref_location_key)))
+        {
+            FetchWeatherTask weatherTask = new FetchWeatherTask(this);
+            String location = value.toString();
+            weatherTask.execute(location);
+        }else
+        {
+            getContentResolver().notifyChange(WeatherContract.WeatherEntry.CONTENT_URI,
+                    null);
+        }
 
         if (preference instanceof ListPreference) {
             // For list preferences, look up the correct display value in

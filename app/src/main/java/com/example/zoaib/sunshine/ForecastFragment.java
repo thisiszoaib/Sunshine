@@ -1,5 +1,6 @@
 package com.example.zoaib.sunshine;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.zoaib.sunshine.data.WeatherContract;
 
@@ -55,7 +57,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        getLoaderManager().initLoader(FORECAST_LOADER,null,this);
+        getLoaderManager().initLoader(FORECAST_LOADER, null, this);
     }
 
     @Override
@@ -87,7 +89,15 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public void onStart()
     {
        super.onStart();
-       updateWeather();
+       //updateWeather();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(mLocation != null && !Utility.getPreferredLocation(getActivity()).equals(mLocation)) {
+            getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
+        }
     }
 
     private void updateWeather()
@@ -124,6 +134,26 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 0
         );
 
+        mForecastAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                switch(columnIndex)
+                {
+                    case COL_WEATHER_MAX_TEMP:
+                    case COL_WEATHER_MIN_TEMP:
+                        ((TextView)view).setText(Utility.formatTemperature(cursor.getDouble(columnIndex),getActivity()));
+                        return true;
+
+                    case COL_WEATHER_DATE:
+                        String dateString = cursor.getString(columnIndex);
+                        TextView dateView = (TextView)view;
+                        dateView.setText(Utility.formatDate(dateString));
+                        return true;
+                }
+                return false;
+            }
+        });
+
 
 
         ListView listView = (ListView)rootView.findViewById(R.id.listview_forecast);
@@ -132,11 +162,17 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //String forecast = mForecastAdapter.getItem(position);
+                SimpleCursorAdapter adapter = (SimpleCursorAdapter)parent.getAdapter();
+                Cursor cursor = adapter.getCursor();
+                if(cursor != null && cursor.moveToPosition(position))
+                {
+                    String dateString = cursor.getString(COL_WEATHER_DATE);
+                    Intent intent = new Intent(getActivity(),DetailActivity.class)
+                            .putExtra(Intent.EXTRA_TEXT,dateString);
+                    startActivity(intent);
+                };
                 //Toast.makeText(getActivity(),forecast,Toast.LENGTH_SHORT).show();
-                //Intent intent = new Intent(getActivity(),DetailActivity.class)
-                //        .putExtra(Intent.EXTRA_TEXT,forecast);
-                //startActivity(intent);
+
 
             }
         });
@@ -153,14 +189,14 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
         mLocation = Utility.getPreferredLocation(getActivity());
         Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
-                mLocation,startDate
+                mLocation, startDate
         );
 
         Log.d("URI: ",mLocation + " " + weatherForLocationUri.toString());
 
         return new CursorLoader(
                 getActivity(),
-                WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(mLocation,startDate),
+                weatherForLocationUri,
                 FORECAST_COLUMNS,
                 null,
                 null,
@@ -175,6 +211,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+
         mForecastAdapter.swapCursor(null);
     }
 
