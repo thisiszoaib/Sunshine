@@ -57,6 +57,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        updateWeather();
         getLoaderManager().initLoader(FORECAST_LOADER, null, this);
     }
 
@@ -167,11 +168,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 if(cursor != null && cursor.moveToPosition(position))
                 {
                     String dateString = cursor.getString(COL_WEATHER_DATE);
+                    //Toast.makeText(getActivity(), dateString, Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(getActivity(),DetailActivity.class)
                             .putExtra(Intent.EXTRA_TEXT,dateString);
                     startActivity(intent);
                 };
-                //Toast.makeText(getActivity(),forecast,Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(),forecast, Toast.LENGTH_SHORT).show();
 
 
             }

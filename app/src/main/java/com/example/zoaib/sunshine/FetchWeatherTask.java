@@ -170,7 +170,7 @@ public class FetchWeatherTask extends AsyncTask<String,Void,Void>
             double cityLatitude = cityCoord.getDouble(OWM_LATITUDE);
             double cityLongitude = cityCoord.getDouble(OWM_LONGITUDE);
 
-            long locationId = addLocation(locationQuery, cityName, cityLatitude, cityLongitude);
+            long locationId = addLocationAndDeleteExistingWeather(locationQuery, cityName, cityLatitude, cityLongitude);
 
             Vector<ContentValues> cVVector = new Vector<ContentValues>(weatherArray.length());
 
@@ -265,8 +265,14 @@ public class FetchWeatherTask extends AsyncTask<String,Void,Void>
         return null;
     }
 
-    private long addLocation(String locationSetting,String cityName,double lat,double lon)
+    private long addLocationAndDeleteExistingWeather(String locationSetting,String cityName,double lat,double lon)
     {
+        mContext.getContentResolver().delete(
+                WeatherContract.WeatherEntry.CONTENT_URI,
+                null,
+                null
+        );
+
         Cursor cursor = mContext.getContentResolver().query(
                 WeatherContract.LocationEntry.CONTENT_URI,
                 null,

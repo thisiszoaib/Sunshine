@@ -65,8 +65,10 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(savedInstanceState != null)
+        if(savedInstanceState != null) {
             mLocation = savedInstanceState.getString(LOCATION_KEY);
+
+        }
         getLoaderManager().initLoader(DETAIL_LOADER,null,this);
     }
 
@@ -145,14 +147,32 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
             TextView highView = (TextView)getView().findViewById(R.id.detail_high_textview);
             TextView lowView = (TextView)getView().findViewById(R.id.detail_low_textview);
 
+            dateView.setText("");
             dateView.setText(Utility.formatDate(dateText));
+            forecastView.setText("");
             forecastView.setText(description);
+            highView.setText("");
             highView.setText(Utility.formatTemperature(high,getActivity())+"\u00B0");
+            lowView.setText("");
             lowView.setText(Utility.formatTemperature(low,getActivity())+"\u00B0");
 
 
             mForecastStr = String.format("%s - %s - %s/%s",dateView.getText(),
                     forecastView.getText(),highView.getText(),lowView.getText());
+        }
+        else
+        {
+            TextView dateView = (TextView)getView().findViewById(R.id.detail_date_textview);
+            TextView forecastView = (TextView)getView().findViewById(R.id.detail_forecast_textview);
+            TextView highView = (TextView)getView().findViewById(R.id.detail_high_textview);
+            TextView lowView = (TextView)getView().findViewById(R.id.detail_low_textview);
+
+            dateView.setText("");
+            forecastView.setText("");
+            highView.setText("");
+            lowView.setText("");
+
+            mForecastStr = "";
         }
     }
 
