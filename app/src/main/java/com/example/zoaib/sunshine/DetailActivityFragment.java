@@ -17,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.zoaib.sunshine.data.WeatherContract;
@@ -37,6 +38,10 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     private static final String FORECAST_SHARE_HASHTAG = "#SunshineApp";
     private String mForecastStr;
     private String mLocation;
+
+    private ImageView mIconView;
+    private TextView mDateView, mFriendlyDateView,mDescriptionView,mHighTempView,
+    mLowTempView,mHumidityView,mWindView,mPressureView;
 
     public DetailActivityFragment() {
         setHasOptionsMenu(true);
@@ -77,6 +82,16 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+
+        mIconView = (ImageView)rootView.findViewById(R.id.detail_icon);
+        mDateView = (TextView)rootView.findViewById(R.id.detail_date_textview);
+        mFriendlyDateView = (TextView)rootView.findViewById(R.id.detail_day_textview);
+        mDescriptionView = (TextView)rootView.findViewById(R.id.detail_forecast_textview);
+        mHighTempView = (TextView)rootView.findViewById(R.id.detail_high_textview);
+        mLowTempView = (TextView)rootView.findViewById(R.id.detail_low_textview);
+        mHumidityView = (TextView)rootView.findViewById(R.id.detail_humidity_textview);
+        mWindView = (TextView)rootView.findViewById(R.id.detail_wind_textview);
+        mPressureView = (TextView)rootView.findViewById(R.id.detail_pressure_textview);
 
         return rootView;
     }
@@ -134,43 +149,62 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
         if(data.moveToFirst()){
+
+            int weatherId = data.getInt(data.getColumnIndex(
+                    WeatherContract.WeatherEntry.COLUMN_WEATHER_ID));
+
+            mIconView.setImageResource(Utility.getArtResourceForWeatherCondition(weatherId));
+
             String description = data.getString(
                     data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC));
-            String dateText = data.getString(
+            mDescriptionView.setText(description);
+
+            String date = data.getString(
                     data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATETEXT));
+            long dateInMilli = WeatherContract.getDateFromDb(date).getTime();
+            String friendlyDateText = Utility.getDayName(getActivity(),
+                    dateInMilli);
+            String dateText = Utility.getFormattedMonthDay(getActivity(),
+                    dateInMilli);
+
+            mFriendlyDateView.setText(friendlyDateText);
+            mDateView.setText(dateText);
 
             double high = data.getDouble(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP));
             double low = data.getDouble(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP));
 
-            TextView dateView = (TextView)getView().findViewById(R.id.detail_date_textview);
-            TextView forecastView = (TextView)getView().findViewById(R.id.detail_forecast_textview);
-            TextView highView = (TextView)getView().findViewById(R.id.detail_high_textview);
-            TextView lowView = (TextView)getView().findViewById(R.id.detail_low_textview);
+            mHighTempView.setText(getString(R.string.format_temperature,high));
+            mLowTempView.setText(getString(R.string.format_temperature,low));
 
-            dateView.setText("");
-            dateView.setText(Utility.formatDate(dateText));
-            forecastView.setText("");
-            forecastView.setText(description);
-            highView.setText("");
-            highView.setText(Utility.formatTemperature(high,getActivity())+"\u00B0");
-            lowView.setText("");
-            lowView.setText(Utility.formatTemperature(low,getActivity())+"\u00B0");
+            double humidity = data.getDouble(data.getColumnIndex(
+                    WeatherContract.WeatherEntry.COLUMN_HUMIDITY));
+            mHumidityView.setText(getString(R.string.format_humidity,humidity));
 
+            float wind = data.getFloat(data.getColumnIndex(
+                    WeatherContract.WeatherEntry.COLUMN_WIND_SPEED
+            ));
+            float degrees = data.getFloat(data.getColumnIndex(
+                    WeatherContract.WeatherEntry.COLUMN_DEGREES
+            ));
+            mWindView.setText(Utility.getFormattedWind(getActivity(),wind,degrees));
 
-            mForecastStr = String.format("%s - %s - %s/%s",dateView.getText(),
-                    forecastView.getText(),highView.getText(),lowView.getText());
+            double pressure = data.getDouble(data.getColumnIndex(
+                    WeatherContract.WeatherEntry.COLUMN_PRESSURE
+            ));
+            mPressureView.setText(getString(R.string.format_pressure,pressure));
+
+            mForecastStr = String.format("%s - %s - %s/%s",mDateView.getText(),
+                    mDescriptionView.getText(),mHighTempView.getText(),mLowTempView.getText());
         }
         else
         {
-            TextView dateView = (TextView)getView().findViewById(R.id.detail_date_textview);
-            TextView forecastView = (TextView)getView().findViewById(R.id.detail_forecast_textview);
-            TextView highView = (TextView)getView().findViewById(R.id.detail_high_textview);
-            TextView lowView = (TextView)getView().findViewById(R.id.detail_low_textview);
-
-            dateView.setText("");
-            forecastView.setText("");
-            highView.setText("");
-            lowView.setText("");
+            mDateView.setText("");
+            mDescriptionView.setText("");
+            mHighTempView.setText("");
+            mLowTempView.setText("");
+            mHumidityView.setText("");
+            mWindView.setText("");
+            mPressureView.setText("");
 
             mForecastStr = "";
         }
