@@ -74,7 +74,10 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
             mLocation = savedInstanceState.getString(LOCATION_KEY);
 
         }
-        getLoaderManager().initLoader(DETAIL_LOADER,null,this);
+        Bundle arguments = getArguments();
+        if(arguments != null && arguments.containsKey(DetailActivity.DATE_KEY)) {
+            getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+        }
     }
 
     @Override
@@ -123,12 +126,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
         };
 
         mLocation = Utility.getPreferredLocation(getActivity());
-        String date = "";
-        Intent intent = getActivity().getIntent();
-
-        if(intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
-            date = intent.getStringExtra(Intent.EXTRA_TEXT);
-        }
+        String date = getArguments().getString(DetailActivity.DATE_KEY);
 
         Log.d(LOG_TAG,"Date passed: " + date);
         Uri weatherUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(
@@ -226,7 +224,9 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     @Override
     public void onResume() {
         super.onResume();
-        if(mLocation != null && !mLocation.equals(Utility.getPreferredLocation(getActivity())))
+        Bundle arguments = getArguments();
+        if(arguments != null && arguments.containsKey(DetailActivity.DATE_KEY) &&
+                mLocation != null && !mLocation.equals(Utility.getPreferredLocation(getActivity())))
         {
             getLoaderManager().restartLoader(DETAIL_LOADER,null,this);
         }

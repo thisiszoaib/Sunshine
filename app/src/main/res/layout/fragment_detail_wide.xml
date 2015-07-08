@@ -1,0 +1,110 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.zoaib.sunshine.DetailActivityFragment">
+
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/detail_day_textview"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textSize="24sp"
+                    android:text="TODAY" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/detail_date_textview"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textSize="20sp"
+                    android:text="JUNE 24" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/detail_high_textview"
+                    android:fontFamily="sans-serif-light"
+                    android:textSize="96sp"
+                    android:text="21o" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/detail_low_textview"
+                    android:fontFamily="sans-serif-light"
+                    android:textSize="48sp"
+                    android:text="8o" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HUMIDITY: 84%"
+                    android:id="@+id/detail_humidity_textview"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textSize="22sp"
+                    android:paddingTop="16dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="WIND: 6 km/H NW"
+                    android:id="@+id/detail_wind_textview"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textSize="22sp"
+                    android:paddingTop="4dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PRESSURE: 1014 hPa"
+                    android:id="@+id/detail_pressure_textview"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textSize="22sp"
+                    android:paddingTop="4dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/detail_icon"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/detail_forecast_textview"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textSize="22sp"
+                    android:text="CLEAR" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+</ScrollView>

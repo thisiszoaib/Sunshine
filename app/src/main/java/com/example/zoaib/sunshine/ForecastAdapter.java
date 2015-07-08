@@ -15,9 +15,15 @@ public class ForecastAdapter extends android.support.v4.widget.CursorAdapter {
 
     private final int VIEW_TYPE_TODAY = 0;
     private final int VIEW_TYPE_FUTURE_DAY = 1;
+    private boolean mUseTodayLayout;
 
     public ForecastAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
+    }
+
+    public void setUseTodayLayout(boolean setUseToday)
+    {
+        mUseTodayLayout = setUseToday;
     }
 
     @Override
@@ -27,7 +33,7 @@ public class ForecastAdapter extends android.support.v4.widget.CursorAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        return (position == 0)?VIEW_TYPE_TODAY:VIEW_TYPE_FUTURE_DAY;
+        return (position == 0 && mUseTodayLayout)?VIEW_TYPE_TODAY:VIEW_TYPE_FUTURE_DAY;
     }
 
     @Override

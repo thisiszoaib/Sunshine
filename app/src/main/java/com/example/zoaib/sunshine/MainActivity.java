@@ -11,12 +11,53 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback {
+
+    boolean mTwoPane;
+
+    @Override
+    public void onItemSelected(String date) {
+        if(mTwoPane){
+            Bundle args = new Bundle();
+            args.putString(DetailActivity.DATE_KEY,date);
+
+            DetailActivityFragment fragment = new DetailActivityFragment();
+            fragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container,fragment)
+                    .commit();
+        }
+        else
+        {
+            Intent intent = new Intent(this,DetailActivityFragment.class)
+                    .putExtra(Intent.EXTRA_TEXT,date);
+            startActivity(intent);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if(findViewById(R.id.weather_detail_container) != null)
+        {
+            mTwoPane = true;
+            if(savedInstanceState == null)
+            {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.weather_detail_container,new DetailActivityFragment())
+                        .commit();
+            }
+        }
+        else
+        {
+            mTwoPane = false;
+        }
+
+        ForecastFragment forecastFragment = ((ForecastFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_forecast));
+        forecastFragment.setUseTodayLayout(!mTwoPane);
     }
 
 
