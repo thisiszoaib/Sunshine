@@ -4,8 +4,9 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeight"
-    android:padding="16dp"
-    android:background="@drawable/touch_selector">
+    android:paddingLeft="50dp"
+    android:background="@color/sunshine_blue"
+    style="@style/TouchSelectorStyle">
 
     <LinearLayout
         android:orientation="vertical"
@@ -18,18 +19,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="TODAY, JUNE 24"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@color/white"
             android:id="@+id/list_item_date_textview" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="21o"
+            android:textSize="72sp"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/white"
             android:id="@+id/list_item_high_textview" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="8o"
+            android:textSize="36sp"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/white"
             android:id="@+id/list_item_low_textview" />
     </LinearLayout>
 
@@ -49,6 +59,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/white"
             android:text="CLEAR"
             android:id="@+id/list_item_forecast_textview" />
     </LinearLayout>

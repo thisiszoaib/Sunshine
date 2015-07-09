@@ -30,7 +30,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         }
         else
         {
-            Intent intent = new Intent(this,DetailActivityFragment.class)
+            Intent intent = new Intent(this,DetailActivity.class)
                     .putExtra(Intent.EXTRA_TEXT,date);
             startActivity(intent);
         }

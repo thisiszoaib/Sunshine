@@ -19,4 +19,8 @@
 
     <style name="ForecastListStyle"></style>
 
+    <style name="TouchSelectorStyle">
+
+    </style>
+
 </resources>
