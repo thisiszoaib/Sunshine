@@ -30,7 +30,7 @@ public class Utility {
     {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return (prefs.getString(context.getString(R.string.pref_units_key),
-                context.getString(R.string.pref_units_metric))) == context.getString(R.string.pref_units_metric);
+                context.getString(R.string.pref_units_metric))).equals(context.getString(R.string.pref_units_metric));
     }
 
     public static String formatTemperature(double temperature,Context context)
