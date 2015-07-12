@@ -19,4 +19,12 @@
         android:entries="@array/pref_units_options"
         />
 
+    <CheckBoxPreference
+        android:key="@string/pref_enable_notifications_key"
+        android:title="Weather Notifications"
+        android:summaryOff="@string/pref_enable_notifications_false"
+        android:summaryOn="@string/pref_enable_notifications_true"
+        android:defaultValue="@string/pref_enable_notifications_default"
+        />
+
 </PreferenceScreen>

@@ -1,8 +1,5 @@
 package com.example.zoaib.sunshine;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -23,7 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.zoaib.sunshine.data.WeatherContract;
-import com.example.zoaib.sunshine.service.SunshineService;
+import com.example.zoaib.sunshine.sync.SunshineSyncAdapter;
 
 import java.util.Date;
 
@@ -44,7 +41,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
             WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
             WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING,
-            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID
+            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
+            WeatherContract.LocationEntry.COLUMN_COORD_LAT,
+            WeatherContract.LocationEntry.COLUMN_COORD_LONG
     };
 
     public static final int COL_WEATHER_UNIQUE_ID = 0;
@@ -54,6 +53,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public static final int COL_WEATHER_MIN_TEMP = 4;
     public static final int COL_LOCATION_SETTING = 5;
     public static final int COL_WEATHER_ID = 6;
+    public static final int COL_LOCATION_LAT = 7;
+    public static final int COL_LOCATION_LONG = 8;
+
 
 
     private CursorAdapter mForecastAdapter;
@@ -99,9 +101,15 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public boolean onOptionsItemSelected(MenuItem item)
     {
         int id = item.getItemId();
-        if(id == R.id.action_refresh)
+//        if(id == R.id.action_refresh)
+//        {
+//            updateWeather();
+//            return true;
+//        }
+
+        if(id==R.id.action_map)
         {
-            updateWeather();
+            openPreferredLocationInMap();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -124,13 +132,15 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     private void updateWeather()
     {
-        Intent alarmIntent = new Intent(getActivity(),SunshineService.AlarmReceiver.class);
-        alarmIntent.putExtra(SunshineService.LOCATION_QUERY_EXTRA, mLocation);
+        SunshineSyncAdapter.syncImmediately(getActivity());
 
-        PendingIntent pi = PendingIntent.getBroadcast(getActivity(),0,alarmIntent,
-                PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager am = (AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP,System.currentTimeMillis()+5000,pi);
+//        Intent alarmIntent = new Intent(getActivity(),SunshineService.AlarmReceiver.class);
+//        alarmIntent.putExtra(SunshineService.LOCATION_QUERY_EXTRA, mLocation);
+//
+//        PendingIntent pi = PendingIntent.getBroadcast(getActivity(),0,alarmIntent,
+//                PendingIntent.FLAG_ONE_SHOT);
+//        AlarmManager am = (AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
+//        am.set(AlarmManager.RTC_WAKEUP,System.currentTimeMillis()+5000,pi);
 
 
         //FetchWeatherTask weatherTask = new FetchWeatherTask(getActivity());
@@ -252,5 +262,33 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             outState.putInt(SELECTED_KEY,mPosition);
         }
         super.onSaveInstanceState(outState);
+    }
+
+    private void openPreferredLocationInMap()
+    {
+        if(mForecastAdapter != null)
+        {
+            Cursor c = mForecastAdapter.getCursor();
+            if( c != null){
+                c.moveToPosition(0);
+                String posLat = c.getString(COL_LOCATION_LAT);
+                String posLong = c.getString(COL_LOCATION_LONG);
+
+                Uri geoLocation = Uri.parse("geo:" + posLat + "," + posLong);
+
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(geoLocation);
+                if(intent.resolveActivity(getActivity().getPackageManager()) != null)
+                {
+                    startActivity(intent);
+                }
+                else
+                {
+                    Log.d("Map", "Couldn't call location, no map app found.");
+                }
+            }
+        }
+
+
     }
 }
